@@ -1,7 +1,6 @@
 import axios from "axios";
 
 export const axiosHelper = async ({ method, url, ...rest }) => {
-
     try {
         const resp = await axios({ method, url, rest });
         return resp.data;
@@ -33,4 +32,12 @@ export const postAData = (data) => {
         headers: { "Content-type": "application/json; charset = UTF-8" }
     }
 
+}
+
+export const postNewData = (data) => {
+    return (fetch("https://fakestoreapi.com/products", {
+        method: "POST",
+        body: JSON.stringify(data),
+        headers: { "Content-type": "application/json; charset = UTF-8" },
+    }))
 }
