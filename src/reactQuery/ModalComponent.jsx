@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { postNewData } from "../constant";
+import { axiosHelper, postAData, postNewData } from "../constant";
 import PropTypes from "prop-types";
 const initialState = {
   title: "",
@@ -20,19 +20,20 @@ const ModalComponent = ({ setShowModal }) => {
     setShowModal: PropTypes.bool,
   };
   const [form, setForm] = useState(initialState);
-  const { mutate, status } = useMutation({
-    mutationFn: (newPost) => postNewData(newPost),
-    // (newPost) =>
-    //   fetch("https://fakestoreapi.com/products", {
-    //     method: "POST",
-    //     body: JSON.stringify(newPost),
-    //     headers: { "Content-type": "application/json; charset = UTF-8" },
-    //   })
+  const { mutate, status, isSuccess } = useMutation({
+    mutationFn:
+      //  (newPost) => postNewData(newPost),
+      // (newPost) =>
+      //   fetch("https://fakestoreapi.com/products", {
+      //     method: "POST",
+      //     body: JSON.stringify(newPost),
+      //     headers: { "Content-type": "application/json; charset = UTF-8" },
+      //   })
 
-    // async (newPost) => {
-    //   console.log(newPost);
-    //   return await axiosHelper(postAData(newPost));
-    // },
+      async (newPost) => {
+        console.log(newPost);
+        return await axiosHelper(postAData(newPost));
+      },
   });
 
   const categoryType = [
