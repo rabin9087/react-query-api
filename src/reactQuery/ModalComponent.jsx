@@ -1,26 +1,37 @@
-import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { axiosHelper, postAData, postNewData } from "../constant";
+import { axiosHelper, postAData } from "../constant";
+
+import { useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
 import PropTypes from "prop-types";
-const initialState = {
-  title: "",
-  price: 0,
-  description: "",
-  category: "",
-  image: "",
-  rating: {
-    rate: 0,
-    count: 0,
-  },
-};
-4;
+const schema = yup.object({
+  title: yup.string().required(),
+  price: yup.number().required(),
+  description: yup.string().required(),
+  category: yup.string().required(),
+  image: yup.string().required(),
+  rating: yup.object({
+    rate: yup.number(),
+    count: yup.number(),
+  }),
+});
 
 const ModalComponent = ({ setShowModal }) => {
   ModalComponent.propTypes = {
     setShowModal: PropTypes.bool,
   };
-  const [form, setForm] = useState(initialState);
-  const { mutate, status, isSuccess } = useMutation({
+
+  const navigate = useNavigate();
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({ resolver: yupResolver(schema) });
+
+  const { mutate, isSuccess, isPending } = useMutation({
     mutationFn:
       //  (newPost) => postNewData(newPost),
       // (newPost) =>
@@ -42,19 +53,15 @@ const ModalComponent = ({ setShowModal }) => {
     { cat: "jewelery", value: "jewelery" },
     { cat: "electronics", value: "electronics" },
   ];
-  const handelOnChange = (e) => {
-    const { name, value } = e.target;
-    setForm({ ...form, [name]: value });
-  };
 
-  const handelOnSubmit = (e) => {
-    e.preventDefault();
-    console.log(form);
-    mutate(form);
-    if (status === "success") {
+  const onSubmit = async (data) => {
+    await mutate(data);
+    if (isSuccess) {
       return setShowModal(false);
     }
+    return;
   };
+
   return (
     <div
       id="authentication-modal"
@@ -94,7 +101,7 @@ const ModalComponent = ({ setShowModal }) => {
           </div>
 
           <div className="p-4 md:p-5">
-            <form className="space-y-4" onSubmit={handelOnSubmit}>
+            <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
               <div>
                 <label
                   htmlFor="title"
@@ -104,13 +111,16 @@ const ModalComponent = ({ setShowModal }) => {
                 </label>
                 <input
                   type="text"
-                  name="title"
                   id="title"
-                  onChange={handelOnChange}
+                  {...register("title", { required: true, maxLength: 20 })}
+                  aria-invalid={errors.title ? "true" : "false"}
                   className="bg-gray-50  border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
                   placeholder="Your product title"
                   required
                 />
+                {errors.title?.type === "required" && (
+                  <p role="alert">Title is required</p>
+                )}
               </div>
               <div className="block">
                 <label
@@ -121,7 +131,8 @@ const ModalComponent = ({ setShowModal }) => {
                 </label>
                 <select
                   id="category"
-                  onChange={handelOnChange}
+                  {...register("category", { required: true, maxLength: 20 })}
+                  aria-invalid={errors.category ? "true" : "false"}
                   className="block w-full px-2 py-1 rounded-md"
                   name={"category"}
                 >
@@ -132,6 +143,9 @@ const ModalComponent = ({ setShowModal }) => {
                     </option>
                   ))}
                 </select>
+                {errors.category?.type === "required" && (
+                  <p role="alert">Category is required</p>
+                )}
               </div>
               <div>
                 <label
@@ -143,12 +157,16 @@ const ModalComponent = ({ setShowModal }) => {
                 <input
                   type="decimal"
                   name="price"
-                  onChange={handelOnChange}
+                  {...register("price", { required: true, maxLength: 20 })}
+                  aria-invalid={errors.price ? "true" : "false"}
                   id="price"
                   className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
                   placeholder="Price of product"
                   required
                 />
+                {errors.price?.type === "required" && (
+                  <p role="alert">Price is required</p>
+                )}
               </div>
               <div>
                 <label
@@ -161,12 +179,29 @@ const ModalComponent = ({ setShowModal }) => {
                   type="file"
                   name="image"
                   alt="image"
-                  onChange={handelOnChange}
+                  // {...register("image", {
+                  //   required: true,
+                  //   valueAsNumber: true,
+                  // })}
+                  onChange={(e) => {
+                    const image = e.target.file[0];
+
+                    return {
+                      ...register(image, {
+                        required: true,
+                        valueAsNumber: true,
+                      }),
+                    };
+                  }}
+                  aria-invalid={errors.image ? "true" : "false"}
                   id="title"
                   className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
                   placeholder="Your product Image"
                   required
                 />
+                {errors.image?.type === "required" && (
+                  <p role="alert">Image is required</p>
+                )}
               </div>
               <div>
                 <label
@@ -179,19 +214,45 @@ const ModalComponent = ({ setShowModal }) => {
                   type="textarea"
                   rows={5}
                   name="description"
-                  onChange={handelOnChange}
+                  {...register("description", {
+                    required: true,
+                  })}
+                  aria-invalid={errors.description ? "true" : "false"}
                   id="description"
                   className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
                   placeholder="Your product description"
                   required
                 />
+                {errors.description?.type === "required" && (
+                  <p role="alert">Description is required</p>
+                )}
               </div>
 
               <button
                 type="submit"
-                className="w-full uppercase text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                // disabled={!isPending}
+                className="flex justify-center w-full uppercase text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
               >
-                Create a Post
+                {!isPending ? (
+                  "Create a Post"
+                ) : (
+                  <svg
+                    aria-hidden="true"
+                    className="inline w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-red-600"
+                    viewBox="0 0 100 101"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
+                      fill="currentColor"
+                    />
+                    <path
+                      d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
+                      fill="currentFill"
+                    />
+                  </svg>
+                )}
               </button>
             </form>
           </div>

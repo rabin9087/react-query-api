@@ -6,7 +6,7 @@ import ModalComponent from "./ModalComponent";
 
 const ReactQueryExample = () => {
   const [showModal, setShowModal] = useState(false);
-
+  console.log(showModal);
   const { data, error, isLoading } = useQuery({
     queryKey: ["posts"],
     queryFn: async () => {
