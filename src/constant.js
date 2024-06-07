@@ -4,7 +4,6 @@ const url = "https://fakestoreapi.com/products"
 
 export const axiosInstance = axios.create({
     baseURL: url,
-    timeout: 3000,
     headers: { "Content-type": "application/json; charset = UTF-8" }
 })
 

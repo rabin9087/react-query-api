@@ -1,4 +1,4 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { postAData } from "../constant";
 
 import { useForm } from "react-hook-form";
@@ -10,8 +10,10 @@ const schema = yup.object({
   title: yup.string().required(),
   price: yup.number().required(),
   description: yup.string().required(),
+  image: yup.mixed().test("required", "please select a file", (value) => {
+    return value && value.length;
+  }),
   category: yup.string().required(),
-  image: yup.string().required(),
   rating: yup.object({
     rate: yup.number(),
     count: yup.number(),
@@ -23,29 +25,23 @@ const ModalComponent = ({ setShowModal }) => {
     setShowModal: PropTypes.bool,
   };
 
-  const navigate = useNavigate();
-
+  const queryClient = useQueryClient();
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm({ resolver: yupResolver(schema) });
 
-  const { mutate, isSuccess, isPending } = useMutation({
-    mutationFn:
-      //  (newPost) => postNewData(newPost),
-      // (newPost) =>
-      //   fetch("https://fakestoreapi.com/products", {
-      //     method: "POST",
-      //     body: JSON.stringify(newPost),
-      //     headers: { "Content-type": "application/json; charset = UTF-8" },
-      //   })
-
-      async (newPost) => {
-        console.log(newPost);
-        return await postAData(newPost);
-      },
-    onSuccess: navigate("/") && setShowModal(false),
+  const { mutate, isPending } = useMutation({
+    mutationFn: async (newPost) => {
+      console.log(newPost);
+      return await postAData(newPost);
+    },
+    onSuccess: (newPost) => {
+      queryClient.setQueryData(["posts"], (oldPosts) => [...oldPosts, newPost]);
+      setShowModal(false) && alert("New data has been posted successfully!");
+      // queryClient.invalidateQueries({queryKey: ["posts"]});
+    },
   });
 
   const categoryType = [
@@ -55,12 +51,17 @@ const ModalComponent = ({ setShowModal }) => {
     { cat: "electronics", value: "electronics" },
   ];
 
-  const onSubmit = async (data) => {
-    await mutate(data);
-    if (isSuccess) {
-      return setShowModal(false);
+  const convert2base64 = (image) => {
+    const reader = new FileReader();
+
+    reader.readAsDataURL(image);
+  };
+
+  const onSubmit = (data) => {
+    if (data.image.length > 0) {
+      convert2base64(data.image[0]);
     }
-    return;
+    return mutate(data);
   };
 
   return (

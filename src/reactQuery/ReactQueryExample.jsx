@@ -7,12 +7,11 @@ import ModalComponent from "./ModalComponent";
 const ReactQueryExample = () => {
   const [showModal, setShowModal] = useState(false);
   const { data, error, isLoading } = useQuery({
-    queryKey: ["postAData"],
+    queryKey: ["posts"],
     queryFn: async () => {
       return await getData();
     },
   });
-  console.log(showModal);
   if (error) return <div>{error.message}!</div>;
 
   if (isLoading) return <div>The data is pending...</div>;
