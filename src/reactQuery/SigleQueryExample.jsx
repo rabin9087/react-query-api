@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { TERipple } from "tw-elements-react";
-import { axiosHelper, getAData } from "../constant";
+import { getAData } from "../constant";
 import { Link, useParams } from "react-router-dom";
 
 const SigleQueryExample = () => {
@@ -8,7 +8,7 @@ const SigleQueryExample = () => {
   const { data } = useQuery({
     queryKey: ["getAData"],
     queryFn: async () => {
-      return await axiosHelper(getAData(id));
+      return await getAData(id);
     },
   });
 

@@ -1,42 +1,38 @@
 import axios from "axios";
 
-export const axiosHelper = async ({ method, url, ...rest }) => {
-    try {
-        const resp = await axios({ method, url, ...rest });
-        return resp.data;
-    } catch (error) {
-        console.log(error.message)
-    }
-};
-
 const url = "https://fakestoreapi.com/products"
 
-export const getData = {
-    method: "GET",
-    url,
+export const axiosInstance = axios.create({
+    baseURL: url,
+    timeout: 3000,
+    headers: { "Content-type": "application/json; charset = UTF-8" }
+})
+
+export const getData = async () => {
+
+    const resp = await axiosInstance.get("/")
+    return resp?.data
 }
 
-export const getAData = (id) => {
-    return {
-        method: "GET",
-        url: url + "/" + `${id}`
-    }
+export const getAData = async (id) => {
+    const { data } = await axiosInstance.get("/" + `${id}`)
+
+    return data
 }
 
-export const postNewData = (data) => {
-    return (fetch("https://fakestoreapi.com/products", {
-        method: "POST",
-        body: JSON.stringify(data),
-        headers: { "Content-type": "application/json; charset = UTF-8" },
-    }))
-}
+export const postNewData = async (data) => {
 
-export const postAData = (data) => {
-    console.log(data)
-    return {
-        method: "POST",
-        url,
+    const resp = await axiosInstance.post("/", {
         data: JSON.stringify(data),
-        headers: { "Content-type": "application/json; charset = UTF-8" }
-    }
+    })
+
+    return resp?.data
+
+}
+
+export const postAData = async (data) => {
+    const resp = await axiosInstance.post("/", data)
+
+    return resp?.data
+
 }

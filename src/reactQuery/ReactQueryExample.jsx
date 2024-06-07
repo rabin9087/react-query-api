@@ -1,19 +1,18 @@
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { axiosHelper, getData } from "../constant";
+import { getData } from "../constant";
 import ModalComponent from "./ModalComponent";
 
 const ReactQueryExample = () => {
   const [showModal, setShowModal] = useState(false);
-  console.log(showModal);
   const { data, error, isLoading } = useQuery({
-    queryKey: ["posts"],
+    queryKey: ["postAData"],
     queryFn: async () => {
-      return await axiosHelper(getData);
+      return await getData();
     },
   });
-
+  console.log(showModal);
   if (error) return <div>{error.message}!</div>;
 
   if (isLoading) return <div>The data is pending...</div>;

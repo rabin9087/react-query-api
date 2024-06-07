@@ -1,5 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
-import { axiosHelper, postAData } from "../constant";
+import { postAData } from "../constant";
 
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
@@ -43,8 +43,9 @@ const ModalComponent = ({ setShowModal }) => {
 
       async (newPost) => {
         console.log(newPost);
-        return await axiosHelper(postAData(newPost));
+        return await postAData(newPost);
       },
+    onSuccess: navigate("/") && setShowModal(false),
   });
 
   const categoryType = [
@@ -179,20 +180,10 @@ const ModalComponent = ({ setShowModal }) => {
                   type="file"
                   name="image"
                   alt="image"
-                  // {...register("image", {
-                  //   required: true,
-                  //   valueAsNumber: true,
-                  // })}
-                  onChange={(e) => {
-                    const image = e.target.file[0];
-
-                    return {
-                      ...register(image, {
-                        required: true,
-                        valueAsNumber: true,
-                      }),
-                    };
-                  }}
+                  {...register("image", {
+                    required: true,
+                    valueAsNumber: true,
+                  })}
                   aria-invalid={errors.image ? "true" : "false"}
                   id="title"
                   className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
